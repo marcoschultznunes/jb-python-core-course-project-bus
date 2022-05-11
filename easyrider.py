@@ -9,8 +9,8 @@ def main():
     # if bs.verify_stops():
     #     bs.print_stops()
 
-    if bs.verify_stops():
-        bs.verify_time()
+    if bs.verify_bus_lines():
+        bs.verify_ondemand_stops()
 
 
 main()
