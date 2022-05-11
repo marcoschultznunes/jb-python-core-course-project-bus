@@ -40,13 +40,49 @@ class BusStops:
                 # if v > 0:
                 print(key + ":", self.errors[key])
 
-    def print_stops_by_bus(self):
+    def get_stops_by_name(self):
+        def stops_group(stop):
+            return stop['stop_name']
+
+        stops = sorted(self.stops, key=stops_group)
+        return itertools.groupby(stops, key=stops_group)
+
+    def get_stops_by_bus(self):
         def bus_group(stop):
             return stop['bus_id']
 
+        stops = sorted(self.stops, key=bus_group)
+        return itertools.groupby(stops, key=bus_group)
+
+    def print_stops_by_bus(self):
         print("Line names and number of stops:")
 
-        stops = sorted(self.stops, key=bus_group)
-        for key, bus in itertools.groupby(stops, key=bus_group):
+        for key, bus in self.get_stops_by_bus():
             bus = list(bus)
             print(f"bus_id: {bus[0]['bus_id']}, stops: {len(bus)}")
+
+    def verify_stops(self):
+        for key, bus in self.get_stops_by_bus():
+            bus = list(bus)
+            start_stops = len(list(filter(lambda s: s['stop_type'] == 'S', bus)))
+            final_stops = len(list(filter(lambda s: s['stop_type'] == 'F', bus)))
+            if not start_stops == 1 or not final_stops == 1:
+                print(f"There is no start or end stop for the line: {bus[0]['bus_id']}.")
+                return False
+        return True
+
+    # https://stackoverflow.com/questions/21289315/itertools-groupby-returns-empty-list-items-when-populated-with-operator-itemget
+    def print_stops(self):  # t_stops => 2+ bus lines
+        s_stops, f_stops, t_stops = set(), set(), set()
+        for k, stop in self.get_stops_by_name():
+            stop = list(stop)
+            for b in stop:
+                if b['stop_type'] == "S":
+                    s_stops.add(b['stop_name'])
+                if b['stop_type'] == "F":
+                    f_stops.add(b['stop_name'])
+            if len(set(map(lambda s: s['bus_id'], stop))) > 1:
+                t_stops.add(stop[0]['stop_name'])
+        print(f"Start stops: {len(s_stops)} {sorted(list(s_stops))}")
+        print(f"Transfer stops: {len(t_stops)} {sorted(list(t_stops))}")
+        print(f"Finish stops: {len(f_stops)} {sorted(list(f_stops))}")
