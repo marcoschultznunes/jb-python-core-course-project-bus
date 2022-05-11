@@ -86,3 +86,29 @@ class BusStops:
         print(f"Start stops: {len(s_stops)} {sorted(list(s_stops))}")
         print(f"Transfer stops: {len(t_stops)} {sorted(list(t_stops))}")
         print(f"Finish stops: {len(f_stops)} {sorted(list(f_stops))}")
+
+    def verify_time(self):
+        wrong_stations = []
+
+        for k, bus in self.get_stops_by_bus():
+            bus = list(bus)
+
+            first_stop = list(filter(lambda fs: fs['stop_type'] == 'S', bus))[0]  # Gets the starting stop
+
+            curr_stop = first_stop
+            while curr_stop['next_stop'] != 0:  # Iterates stops in order
+                next_stop = list(filter(lambda ns: ns['stop_id'] == curr_stop['next_stop'], bus))[0]
+
+                if next_stop['a_time'] < curr_stop['a_time']:
+                    s = {"bus_id": first_stop['bus_id'], "stop": next_stop['stop_name']}
+                    wrong_stations.append(s)
+                    break  # Only one error needed per bus line
+
+                curr_stop = next_stop
+
+        print("Arrival time test:")
+        if len(wrong_stations) == 0:
+            print("OK")
+        else:
+            for s in wrong_stations:
+                print(f"bus_id line {s['bus_id']}: wrong time on station {s['stop']}")
